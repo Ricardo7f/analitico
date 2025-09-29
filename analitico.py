@@ -80,8 +80,16 @@ def determinar_tipo_servico(servico_desc):
 def processar_planilha(uploaded_file):
     """Processa a planilha uploaded"""
     try:
-        # Carregar arquivo
-        df_original = pd.read_excel(uploaded_file, engine='openpyxl')
+        # Detectar tipo de arquivo e usar engine apropriado
+        file_extension = uploaded_file.name.split('.')[-1].lower()
+        
+        if file_extension == 'xls':
+            # Arquivo Excel antigo (.xls)
+            df_original = pd.read_excel(uploaded_file, engine='xlrd')
+        else:
+            # Arquivo Excel novo (.xlsx)
+            df_original = pd.read_excel(uploaded_file, engine='openpyxl')
+        
         st.info(f"Arquivo carregado: {len(df_original)} linhas e {len(df_original.columns)} colunas")
         
         # Carregar e filtrar por cidades
@@ -207,7 +215,7 @@ st.title("📊 Processador de Planilhas")
 st.markdown("---")
 
 # Upload de arquivo
-uploaded_file = st.file_uploader("Selecione o arquivo Excel (.xlsx)", type=['xlsx'])
+uploaded_file = st.file_uploader("Selecione o arquivo Excel (.xlsx ou .xls)", type=['xlsx', 'xls'])
 
 if uploaded_file is not None:
     if st.button("Processar Planilha", type="primary"):
@@ -324,13 +332,14 @@ if st.session_state.df_processado is not None:
 with st.sidebar:
     st.header("Instruções")
     st.markdown("""
-    1. **Upload**: Selecione arquivo Excel (.xlsx)
+    1. **Upload**: Selecione arquivo Excel (.xlsx ou .xls)
     2. **Processar**: Clique em 'Processar Planilha'
     3. **Filtrar**: Marque os status desejados
     4. **Visualizar**: Navegue pelas abas de equipes
     5. **Baixar**: Use os botões de download
     
     **Recursos:**
+    - Aceita .xlsx e .xls
     - Filtra por cidades e equipes automaticamente
     - Separa RELIGAÇÃO e FISCALIZAÇÃO
     - Calcula dias de atraso
